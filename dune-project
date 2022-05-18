@@ -13,7 +13,7 @@
 
 (generate_opam_files true)
 
-(license LICENSE-UNLICENSE)
+(license MIT)
 
 (maintainers "Pomba Magar <pomba.magar@gmail.com>")
 
@@ -25,5 +25,7 @@
 (package
  (name hello_ocaml)
  (synopsis "Beginner's guide to Ocaml ecosystem")
- (depends threads cmdliner)
+ (depends cmdliner taglib)
+ (tags
+  (cli "mp3 tag editor"))
  (description "Beginner's guide to Ocaml ecosystem"))

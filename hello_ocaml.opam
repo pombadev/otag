@@ -5,13 +5,14 @@ synopsis: "Beginner's guide to Ocaml ecosystem"
 description: "Beginner's guide to Ocaml ecosystem"
 maintainer: ["Pomba Magar <pomba.magar@gmail.com>"]
 authors: ["Pomba Magar <pomba.magar@gmail.com>"]
-license: "LICENSE-UNLICENSE"
+license: "MIT"
+tags: ["cli" "mp3 tag editor"]
 homepage: "https://github.com/pjmp/hello_ocaml"
 bug-reports: "https://github.com/pjmp/hello_ocaml/issues"
 depends: [
   "dune" {>= "3.1"}
-  "threads"
   "cmdliner"
+  "taglib"
   "odoc" {with-doc}
 ]
 build: [
