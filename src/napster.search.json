@@ -1,0 +1,71 @@
+{
+    "meta": {
+        "totalCount": 1,
+        "returnedCount": 1
+    },
+    "search": {
+        "query": "No Drum And Bass In The Jazz Room",
+        "data": {
+            "albums": [
+                {
+                    "type": "album",
+                    "id": "alb.338049241",
+                    "upc": "3615935529303",
+                    "shortcut": "clevergirl/no-drum-and-bass-in-the-jazz-room",
+                    "href": "https://api.napster.com/v2.2/albums/alb.338049241",
+                    "name": "No Drum and Bass in the Jazz Room",
+                    "released": "2018-11-23T00:00:00.000Z",
+                    "originallyReleased": "2018-11-23T00:00:00.000Z",
+                    "label": "Barely Regal Records",
+                    "copyright": "Clever Girl",
+                    "tags": [
+                        "EP"
+                    ],
+                    "discCount": 1,
+                    "trackCount": 4,
+                    "isExplicit": false,
+                    "isSingle": true,
+                    "accountPartner": "Believe Digital",
+                    "artistName": "Clevergirl",
+                    "isAvailableInHiRes": false,
+                    "isAvailableInAtmos": false,
+                    "contributingArtists": {
+                        "primaryArtist": "art.10434068"
+                    },
+                    "discographies": {
+                        "singlesAndEPs": [
+                            "art.10434068"
+                        ]
+                    },
+                    "links": {
+                        "images": {
+                            "href": "https://api.napster.com/v2.2/albums/alb.338049241/images"
+                        },
+                        "tracks": {
+                            "href": "https://api.napster.com/v2.2/albums/alb.338049241/tracks"
+                        },
+                        "posts": {
+                            "href": "https://api.napster.com/v2.2/albums/alb.338049241/posts"
+                        },
+                        "artists": {
+                            "ids": [
+                                "art.10434068"
+                            ],
+                            "href": "https://api.napster.com/v2.2/artists/art.10434068"
+                        },
+                        "genres": {
+                            "ids": [
+                                "g.44"
+                            ],
+                            "href": "https://api.napster.com/v2.2/genres/g.44"
+                        }
+                    },
+                    "isStreamable": true
+                }
+            ]
+        },
+        "order": [
+            "alb.338049241"
+        ]
+    }
+}

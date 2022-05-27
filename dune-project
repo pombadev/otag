@@ -25,7 +25,7 @@
 (package
  (name hello_ocaml)
  (synopsis "Beginner's guide to Ocaml ecosystem")
- (depends cmdliner taglib)
+ (depends cmdliner taglib quests)
  (tags
   (cli "mp3 tag editor"))
  (description "Beginner's guide to Ocaml ecosystem"))
