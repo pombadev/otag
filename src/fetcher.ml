@@ -73,14 +73,27 @@ module Napster = struct
                member "released" d |> to_string |> String.split_on_char '-'
                |> List.fold_left
                     (fun init current ->
-                      if String.length init.year = 0 then
-                        { init with year = current }
-                      else if String.length init.month = 0 then
-                        { init with month = current }
-                      else if String.length init.day = 0 then
-                        let day = String.split_on_char 'T' current |> List.hd in
-                        { init with day }
-                      else init)
+                      match
+                        ( String.length init.year,
+                          String.length init.month,
+                          String.length init.day )
+                      with
+                      | 0, _, _ -> { init with year = current }
+                      | _, 0, _ -> { init with month = current }
+                      | _, _, 0 ->
+                          let day =
+                            String.split_on_char 'T' current |> List.hd
+                          in
+                          { init with day }
+                      | _ -> init
+                      (* if String.length init.year = 0 then
+                           { init with year = current }
+                         else if String.length init.month = 0 then
+                           { init with month = current }
+                         else if String.length init.day = 0 then
+                           let day = String.split_on_char 'T' current |> List.hd in
+                           { init with day }
+                         else init *))
                     { year = ""; month = ""; day = "" }
              in
              let links =
