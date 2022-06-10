@@ -46,78 +46,69 @@ let parse_cli path format group infer =
 
   ret
 
-type 't grouped_album = { name : string; tracks : 't list }
-type 'a grouped_by = { artist : string; albums : 'a grouped_album list }
-
-let replace l pos a = List.mapi (fun i x -> if i = pos then a else x) l
+type 't grouped_album = { name : string; mutable tracks : 't list }
+type 'a grouped_by = { artist : string; mutable albums : 'a grouped_album list }
 
 let grouper path =
   let audio_of_path = path |> List.map get_audio_from_path |> List.flatten in
 
   let grouped_list =
     audio_of_path
-    |> List.mapi (fun index item -> (index, item))
     |> List.fold_left
-         (fun init (index, (_, current)) ->
-           let artist = safe_get Taglib.tag_artist current in
-           let album = safe_get Taglib.tag_album current in
-           let has_artist =
-             init |> List.find_opt (fun grouped -> grouped.artist = artist)
-           in
+         (fun init (_, current) ->
+           let artist_from_tag = safe_get Taglib.tag_artist current in
+           let album_from_tag = safe_get Taglib.tag_album current in
 
-           let g_album =
-             match has_artist with
-             | Some artist ->
-                 let has_album =
-                   artist.albums
-                   |> List.find_opt (fun g_album -> g_album.name = album)
-                 in
-
-                 let album =
-                   match has_album with
-                   | Some album ->
-                       { album with tracks = album.tracks @ [ current ] }
-                   | None -> { name = album; tracks = [ current ] }
-                 in
-
-                 album
-             | None -> { name = album; tracks = [ current ] }
-           in
-
-           match has_artist with
-           | Some grouped ->
-               replace init index
-                 { grouped with albums = grouped.albums @ [ g_album ] }
-           | None ->
-               init
-               @ [
+           let _ =
+             match Hashtbl.find_opt init artist_from_tag with
+             | None ->
+                 Hashtbl.add init artist_from_tag
                    {
-                     artist;
-                     albums = [ { name = album; tracks = [ current ] } ];
-                   };
-                 ])
-         []
+                     artist = artist_from_tag;
+                     albums =
+                       [ { name = album_from_tag; tracks = [ current ] } ];
+                   }
+             | Some grouped ->
+                 let _ =
+                   match
+                     grouped.albums
+                     |> List.find_opt (fun al -> al.name = album_from_tag)
+                   with
+                   | None ->
+                       grouped.albums <-
+                         grouped.albums
+                         @ [ { name = album_from_tag; tracks = [ current ] } ]
+                   | Some g_album ->
+                       g_album.tracks <- g_album.tracks @ [ current ]
+                 in
+                 ()
+           in
+
+           init)
+         (Hashtbl.create 64)
   in
 
   let _ =
-    grouped_list
-    |> List.iter (fun group ->
-           Printf.printf "'%s' has %d album(s)\n" group.artist
-             (List.length group.albums);
+    Hashtbl.iter
+      (fun _ grouped ->
+        Printf.printf "'%s' has '%d' album(s)\n" grouped.artist
+          (List.length grouped.albums);
 
-           group.albums
-           |> List.iter (fun album ->
-                  Printf.printf "Album: %s\n" album.name;
+        grouped.albums
+        |> List.iter (fun album ->
+               Printf.printf "Album: %s\n" album.name;
 
-                  album.tracks
-                  |> List.iter (fun track ->
-                         Printf.printf "[ %d ] %s\n"
-                           (safe_get_int Taglib.tag_track track)
-                           (safe_get Taglib.tag_title track)));
-           ())
+               album.tracks
+               |> List.sort (fun a b ->
+                      let no_a = safe_get_int Taglib.tag_track a in
+                      let no_b = safe_get_int Taglib.tag_track b in
+                      if no_a < no_b then -1 else 1)
+               |> List.iter (fun track ->
+                      Printf.printf "[ %d ] %s\n"
+                        (safe_get_int Taglib.tag_track track)
+                        (safe_get Taglib.tag_title track))))
+      grouped_list
   in
-
-  print_endline ("\nLength " ^ string_of_int (List.length grouped_list));
 
   (* audio_of_path
      |> List.iter (fun path_files ->
