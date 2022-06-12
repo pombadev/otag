@@ -1,33 +1,20 @@
 let get_audio_from_path dir =
   let rec loop result = function
     | f :: fs when try Sys.is_directory f with _ -> false ->
-        Sys.readdir f
-        |> Array.to_list
+        Sys.readdir f |> Array.to_list
         |> List.map (Filename.concat f)
-        |> List.append fs
-        |> loop result
+        |> List.append fs |> loop result
     | f :: fs -> loop (f :: result) fs
     | [] -> result
   in
   let files = loop [] [ dir ] in
-    List.filter_map
-      (fun file_name ->
-        try
-          let taglib_file = Taglib.File.open_file `Autodetect file_name in
-          Some (file_name, taglib_file)
-        with _ -> None)
+  List.filter_map
+    (fun file_name ->
+      try
+        let taglib_file = Taglib.File.open_file `Autodetect file_name in
+        Some (file_name, taglib_file)
+      with _ -> None)
     files
-  [@@ocamlformat "disable"]
-
-(* type track = {
-     genre : string;
-     comment : string;
-     title : string;
-     artist : string;
-     year : string;
-     track : string;
-     album : string;
-   } *)
 
 type action = Group | Tag of string option
 
@@ -50,7 +37,13 @@ type 't grouped_album = { name : string; mutable tracks : 't list }
 type 'a grouped_by = { artist : string; mutable albums : 'a grouped_album list }
 
 let grouper path =
-  let audio_of_path = path |> List.map get_audio_from_path |> List.flatten in
+  let audio_of_path =
+    path
+    (* remove duplicates *)
+    |> List.sort_uniq compare
+    |> List.map get_audio_from_path
+    |> List.flatten
+  in
 
   let grouped_list =
     audio_of_path
@@ -85,7 +78,7 @@ let grouper path =
            in
 
            init)
-         (Hashtbl.create 64)
+         (Hashtbl.create (List.length path))
   in
 
   let _ =
