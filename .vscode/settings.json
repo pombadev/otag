@@ -1,5 +1,9 @@
 {
     "ocaml.sandbox": {
         "kind": "global"
-    }
+    },
+    "cSpell.words": [
+        "iteri",
+        "treeify"
+    ]
 }

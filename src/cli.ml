@@ -13,10 +13,10 @@ let path =
   in
   Arg.non_empty (Arg.pos_all Arg.file [] info)
 
-let group =
+let tree =
   Arg.(
     value & flag
-    & info [ "g"; "group-view" ] ~docv:"GROUP" ~doc:"group input by artist")
+    & info [ "t"; "tree-view" ] ~docv:"TREE" ~doc:"visualize input as tree")
 
 let infer_from_path =
   Arg.(
@@ -62,6 +62,6 @@ let documentation =
 let cmd =
   let man, doc = documentation in
   let info = Cmd.info "otag" ~version:"0.1" ~doc ~man in
-  Cmd.v info Term.(const Commands.run $ path $ format $ group $ infer_from_path)
+  Cmd.v info Term.(const Commands.run $ path $ format $ tree $ infer_from_path)
 
 let main () = Cmd.eval cmd
