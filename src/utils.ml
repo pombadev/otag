@@ -45,7 +45,7 @@ let audio_of_path path =
     |> List.flatten
   in
 
-  let grouped_list =
+  let grouped =
     files
     |> List.fold_left
          (fun init (_, current) ->
@@ -88,4 +88,4 @@ let audio_of_path path =
            init)
          (Hashtbl.create (List.length path))
   in
-  grouped_list
+  grouped

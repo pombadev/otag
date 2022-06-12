@@ -16,12 +16,12 @@ let path =
 let tree =
   Arg.(
     value & flag
-    & info [ "t"; "tree-view" ] ~docv:"TREE" ~doc:"visualize input as tree")
+    & info [ "t"; "tree-view" ] ~docv:"TREE" ~doc:"Visualize input as tree")
 
 let infer_from_path =
   Arg.(
     value & flag
-    & info [ "I"; "infer-from-path" ] ~docv:"INFER"
+    & info [ "i"; "infer-from-path" ] ~docv:"INFER"
         ~doc:"Infer metadata from path")
 
 let documentation =
@@ -35,7 +35,8 @@ let documentation =
       `P
         "Currently it supports both ID3v1 and ID3v2 for MP3 files, Ogg Vorbis \
          comments and ID3 tags and Vorbis comments in FLAC, MPC, Speex, \
-         WavPack, TrueAudio, WAV, AIFF, MP4 and ASF files.";
+         WavPack, TrueAudio, WAV, AIFF, MP4 and ASF files i.e whatever taglib \
+         supports.";
       `S Manpage.s_examples;
       `Pre "$(tname) test.mp3";
       `Noblank;
