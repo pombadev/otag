@@ -7,8 +7,8 @@ maintainer: ["Pomba Magar <pomba.magar@gmail.com>"]
 authors: ["Pomba Magar <pomba.magar@gmail.com>"]
 license: "MIT"
 tags: ["cli" "mp3 tag editor"]
-homepage: "https://github.com/pjmp/hello_ocaml"
-bug-reports: "https://github.com/pjmp/hello_ocaml/issues"
+homepage: "https://github.com/pjmp/otag"
+bug-reports: "https://github.com/pjmp/otag/issues"
 depends: [
   "dune" {>= "3.1"}
   "cmdliner"
@@ -30,4 +30,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
-dev-repo: "git+https://github.com/pjmp/hello_ocaml.git"
+dev-repo: "git+https://github.com/pjmp/otag.git"

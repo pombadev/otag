@@ -3,6 +3,7 @@
         "kind": "global"
     },
     "cSpell.words": [
+        "getenv",
         "iteri",
         "treeify"
     ]

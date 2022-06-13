@@ -71,11 +71,11 @@ dune init lib mylib src --libs core --inline-tests --public
 ### Full example, taken mostly from [OPAM for npm/yarn users](https://ocamlverse.github.io/content/opam_npm.html)
 
 ```bash
-dune init proj --kind=exe hello_ocaml
-cd hello_ocaml
-cat << EOF > hello_ocaml.opam
+dune init proj --kind=exe otag
+cd otag
+cat << EOF > otag.opam
 opam-version: "2.0"
-name: "hello_ocaml"
+name: "otag"
 authors: "Author"
 homepage: "<url>"
 maintainer: "<email>"
@@ -95,7 +95,7 @@ EOF
 opam switch create . 4.14.0 --deps-only
 eval $(opam env)
 dune build
-dune exec hello_ocaml
+dune exec otag
 ```
 
 > dune fails, with `cannot find the root`, please make sure your dune is at least 3.1.1, or create `dune-project` file
@@ -127,10 +127,10 @@ Depending on what project you are building eg `bin`/`lib`, edit the `<type>/dune
 
 ```diff
 -(executable
-- (public_name hello_ocaml)
+- (public_name otag)
 - (name main))
 +(executable
-+ (public_name hello_ocaml)
++ (public_name otag)
 + (name main)
 + (libraries <package>))
 ```

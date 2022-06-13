@@ -2,7 +2,7 @@
 
 (version 0.1)
 
-(name hello_ocaml)
+(name otag)
 
 ; remove ugly `Dune__exe__` prefix
 ; https://dune.readthedocs.io/en/stable/dune-files.html#wrapped-executables-1
@@ -20,10 +20,10 @@
 (authors "Pomba Magar <pomba.magar@gmail.com>")
 
 (source
- (github pjmp/hello_ocaml))
+ (github pjmp/otag))
 
 (package
- (name hello_ocaml)
+ (name otag)
  (synopsis "Beginner's guide to Ocaml ecosystem")
  (depends cmdliner taglib quests)
  (tags

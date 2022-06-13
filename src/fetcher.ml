@@ -1,8 +1,9 @@
 let content_type = ("Content-Type", "application/json")
 
 let user_agent =
-  ( "User-Agent",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0" )
+  let os, ver = Sys.(os_type, ocaml_version) in
+  let ua = Printf.sprintf "OTag/0.1 (%s) %s" os ver in
+  ("User-Agent", ua)
 
 module Napster = struct
   type search_type = [ `Album | `Artist | `Track ]
@@ -29,9 +30,9 @@ module Napster = struct
     links : links_t;
   }
 
-  let search ~qt ~query =
+  let search ~query_type ~query () =
     let qt =
-      match qt with
+      match query_type with
       | `Album -> "album"
       | `Artist -> "artist"
       | `Track -> "track"
@@ -85,15 +86,7 @@ module Napster = struct
                             String.split_on_char 'T' current |> List.hd
                           in
                           { init with day }
-                      | _ -> init
-                      (* if String.length init.year = 0 then
-                           { init with year = current }
-                         else if String.length init.month = 0 then
-                           { init with month = current }
-                         else if String.length init.day = 0 then
-                           let day = String.split_on_char 'T' current |> List.hd in
-                           { init with day }
-                         else init *))
+                      | _ -> init)
                     { year = ""; month = ""; day = "" }
              in
              let links =
@@ -131,5 +124,6 @@ module Napster = struct
             ^ album.released.day);
            print_endline ("label = " ^ album.label);
            print_endline ("copyright = " ^ album.copyright);
-           print_endline ("id = " ^ album.id))
+           print_endline ("id = " ^ album.id));
+    Lwt.return ()
 end

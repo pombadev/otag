@@ -1,4 +1,4 @@
 (executable
- (public_name hello_ocaml)
+ (public_name otag)
  (name main)
  (libraries cmdliner taglib quests))

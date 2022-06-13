@@ -50,47 +50,57 @@ let treeify path =
   in
   ()
 
+let tag ~path ~format ~infer =
+  Printf.printf "format = %s\ninfer = %b\n"
+    (Option.value format ~default:"default")
+    infer;
+  let grouped = audio_of_path path in
+  let () =
+    grouped
+    |> Hashtbl.iter (fun artist group ->
+           print_endline ("Artist " ^ artist);
+
+           group.albums
+           |> List.iter (fun album ->
+                  album.tracks
+                  |> List.iter (fun track ->
+                         Printf.printf "[%d] %s\n"
+                           (safe_get_int Taglib.tag_track track)
+                           (safe_get Taglib.tag_title track)))
+           (* path
+              |> List.map get_audio_from_path
+              |> List.iter (fun path_files ->
+                     path_files
+                     |> List.iter (fun (path, file) ->
+                            if infer then (
+                              let s =
+                                String.split_on_char
+                                  (String.get Filename.dir_sep 0)
+                                  path
+                                |> List.rev
+                              in
+
+                              let artist =
+                                Option.value (List.nth_opt s 2) ~default:""
+                              in
+                              let album =
+                                Option.value (List.nth_opt s 1) ~default:""
+                              in
+                              let track =
+                                Option.value (List.nth_opt s 0) ~default:""
+                              in
+
+                              Printf.printf
+                                "Inferred\ntrack = %s\nalbum = %s\nartist = %s\n\n"
+                                track album artist;
+
+                              Taglib.tag_set_album file album;
+                              Taglib.tag_set_artist file artist;
+                              Taglib.tag_set_title file track;
+                              Taglib.file_save file |> ignore;
+                              Taglib.File.file_save file |> ignore))) *))
+  in
+  ()
+
 let run path format tree infer =
-  let act = parse_cli path format tree infer in
-
-  match act with
-  | Tree -> treeify path
-  | Tag t -> (
-      match t with
-      | Some s ->
-          Printf.printf "do other stuffs: %s\n" s;
-          path
-          |> List.map get_audio_from_path
-          |> List.iter (fun path_files ->
-                 path_files
-                 |> List.iter (fun (path, file) ->
-                        if infer then (
-                          let s =
-                            String.split_on_char
-                              (String.get Filename.dir_sep 0)
-                              path
-                            |> List.rev
-                          in
-
-                          let artist =
-                            Option.value (List.nth_opt s 2) ~default:""
-                          in
-                          let album =
-                            Option.value (List.nth_opt s 1) ~default:""
-                          in
-                          let track =
-                            Option.value (List.nth_opt s 0) ~default:""
-                          in
-
-                          Printf.printf
-                            "Inferred\ntrack = %s\nalbum = %s\nartist = %s\n\n"
-                            track album artist;
-
-                          Taglib.tag_set_album file album;
-                          Taglib.tag_set_artist file artist;
-                          Taglib.tag_set_title file track;
-                          Taglib.file_save file |> ignore;
-                          Taglib.File.file_save file |> ignore)))
-      | None ->
-          print_endline "do other stuffs..";
-          ())
+  match tree with true -> treeify path | false -> tag ~path ~format ~infer

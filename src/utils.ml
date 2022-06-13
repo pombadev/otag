@@ -16,22 +16,8 @@ let get_audio_from_path dir =
       with _ -> None)
     files
 
-type action = Tree | Tag of string option
-
 let safe_get tag file = try tag file with _ -> ""
 let safe_get_int tag file = try tag file with _ -> 0
-
-let parse_cli path format tree infer =
-  Printf.printf "tree = %b\npath = %s\nformat = %s\nformat src = %b\n\n\n" tree
-    (String.concat ", " path)
-    (match format with
-    | Some f -> Printf.sprintf "%s" f
-    | None -> Printf.sprintf "Default format")
-    infer;
-
-  let ret = match tree with true -> Tree | false -> Tag (Some "") in
-
-  ret
 
 type 't grouped_album = { name : string; mutable tracks : 't list }
 type 'a grouped_by = { artist : string; mutable albums : 'a grouped_album list }
@@ -72,15 +58,12 @@ let audio_of_path path =
                          grouped.albums
                          @ [ { name = album_from_tag; tracks = [ current ] } ]
                    | Some g_album ->
-                       let _ = g_album.tracks <- g_album.tracks @ [ current ] in
-                       let _ =
-                         g_album.tracks
+                       g_album.tracks <-
+                         g_album.tracks @ [ current ]
                          |> List.sort (fun this that ->
                                 let no_a = safe_get_int Taglib.tag_track this in
                                 let no_b = safe_get_int Taglib.tag_track that in
                                 if no_a < no_b then -1 else 1)
-                       in
-                       ()
                  in
                  ()
            in
