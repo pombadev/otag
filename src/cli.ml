@@ -25,6 +25,9 @@ let infer_from_path =
         ~doc:"Infer metadata from path")
 
 let documentation =
+  let envs =
+    [ Cmd.Env.info "NAPSTER_APIKEY" ~doc:"API key if napster is used" ]
+  in
   let man =
     [
       `S Manpage.s_description;
@@ -45,6 +48,7 @@ let documentation =
       `Pre
         "$(tname) Artist-Album-01 Track.mp3 --format=artist-album-track_num \
          track";
+      `S Manpage.s_environment;
       `S Manpage.s_authors;
       `P "Pomba Magar <pomba.magar@gmail.com>";
       `S Manpage.s_bugs;
@@ -57,12 +61,16 @@ let documentation =
       `P "ocaml-taglib - https://github.com/savonet/ocaml-taglib";
     ]
   in
-  let doc = "opinionated audio tag editor" in
-  (man, doc)
+  (man, envs)
 
 let cmd =
-  let man, doc = documentation in
-  let info = Cmd.info "otag" ~version:"0.1" ~doc ~man in
+  let man, envs = documentation in
+  let info =
+    Cmd.info "otag"
+      ~version:(Lazy.force DuneProject.version)
+      ~doc:(Lazy.force DuneProject.synopsis)
+      ~exits:[] ~man ~envs
+  in
   Cmd.v info Term.(const Commands.run $ path $ format $ tree $ infer_from_path)
 
 let main () = Cmd.eval cmd

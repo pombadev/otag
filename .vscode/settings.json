@@ -3,8 +3,11 @@
         "kind": "global"
     },
     "cSpell.words": [
+        "cond",
         "getenv",
         "iteri",
+        "sdocs",
+        "sdune",
         "treeify"
     ]
 }
