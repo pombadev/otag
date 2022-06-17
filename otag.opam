@@ -21,6 +21,7 @@ depends: [
   "cmdliner"
   "taglib"
   "quests"
+  "inquire"
   "odoc" {with-doc}
 ]
 build: [

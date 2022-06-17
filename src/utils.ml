@@ -72,3 +72,6 @@ let audio_of_path path =
          (Hashtbl.create (List.length path))
   in
   grouped
+
+let prompt ~choices ?(msg = "Select") ?(default = 0) () =
+  Inquire.select msg ~options:choices ~default
