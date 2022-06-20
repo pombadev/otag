@@ -1,7 +1,7 @@
 open Utils
 
-let treeify path =
-  let grouped = audio_of_path path in
+let treeify ~paths =
+  let grouped = audio_of_path paths in
 
   let _ =
     let count = ref 0 in
@@ -31,7 +31,7 @@ let treeify path =
                let tracks_count = List.length album.tracks in
 
                album.tracks
-               |> List.iteri (fun index track ->
+               |> List.iteri (fun index (_, track) ->
                       let current_track = index + 1 in
                       let stop =
                         !count = artist_count && current_artist = album_count
@@ -50,11 +50,11 @@ let treeify path =
   in
   ()
 
-let tag ~path ~format ~infer =
+let tag ~paths ~format ~infer =
   Printf.printf "format = %s\ninfer = %b\n"
     (Option.value format ~default:"default")
     infer;
-  let grouped = audio_of_path path in
+  let grouped = audio_of_path paths in
   let discog =
     Hashtbl.fold
       (fun artist group init ->
@@ -142,5 +142,48 @@ let tag ~path ~format ~infer =
                    Taglib.file_save file |> ignore;
                    Taglib.File.file_save file |> ignore))) *)
 
-let run path format tree infer =
-  match tree with true -> treeify path | false -> tag ~path ~format ~infer
+let organizer ~paths ~dest =
+  let mkdir dir =
+    let exist = try Sys.is_directory dir with _ -> false in
+    if not exist then FileUtil.mkdir ~parent:true dir
+  in
+
+  audio_of_path paths
+  |> Hashtbl.iter (fun artist group ->
+         let dir = Filename.concat dest artist in
+         mkdir dir;
+
+         group.albums
+         |> List.iter (fun album ->
+                let dir = Filename.concat dir album.name in
+                mkdir dir;
+
+                let files, _ =
+                  List.fold_right
+                    (fun (path, file) init ->
+                      let ps = fst init in
+                      let fs = snd init in
+
+                      (ps @ [ path ], fs @ [ file ]))
+                    album.tracks ([], [])
+                in
+
+                try FileUtil.cp ~recurse:true files dir
+                with _ -> (
+                  Printf.eprintf "Unable to copy files to %s\n" dir;
+
+                  try FileUtil.rm ~recurse:true files
+                  with _ ->
+                    Printf.eprintf "Error removing copied files to %s\n" dir)))
+
+let run paths format tree infer organize =
+  let action =
+    match tree with
+    | true -> `Tree
+    | false -> ( match organize with Some s -> `Organize s | None -> `Tag)
+  in
+
+  match action with
+  | `Tree -> treeify ~paths
+  | `Organize dest -> organizer ~paths ~dest
+  | `Tag -> tag ~paths ~format ~infer

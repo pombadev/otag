@@ -19,7 +19,7 @@ let get_audio_from_path dir =
 let safe_get tag file = try tag file with _ -> ""
 let safe_get_int tag file = try tag file with _ -> 0
 
-type 't grouped_album = { name : string; mutable tracks : 't list }
+type 't grouped_album = { name : string; mutable tracks : (string * 't) list }
 type 'a grouped_by = { artist : string; mutable albums : 'a grouped_album list }
 
 let audio_of_path path =
@@ -34,7 +34,7 @@ let audio_of_path path =
   let grouped =
     files
     |> List.fold_left
-         (fun init (_, current) ->
+         (fun init (path, current) ->
            let artist_from_tag = safe_get Taglib.tag_artist current in
            let album_from_tag = safe_get Taglib.tag_album current in
 
@@ -45,7 +45,9 @@ let audio_of_path path =
                    {
                      artist = artist_from_tag;
                      albums =
-                       [ { name = album_from_tag; tracks = [ current ] } ];
+                       [
+                         { name = album_from_tag; tracks = [ (path, current) ] };
+                       ];
                    }
              | Some grouped ->
                  let _ =
@@ -56,11 +58,16 @@ let audio_of_path path =
                    | None ->
                        grouped.albums <-
                          grouped.albums
-                         @ [ { name = album_from_tag; tracks = [ current ] } ]
+                         @ [
+                             {
+                               name = album_from_tag;
+                               tracks = [ (path, current) ];
+                             };
+                           ]
                    | Some g_album ->
                        g_album.tracks <-
-                         g_album.tracks @ [ current ]
-                         |> List.sort (fun this that ->
+                         g_album.tracks @ [ (path, current) ]
+                         |> List.sort (fun (_, this) (_, that) ->
                                 let no_a = safe_get_int Taglib.tag_track this in
                                 let no_b = safe_get_int Taglib.tag_track that in
                                 if no_a < no_b then -1 else 1)

@@ -25,11 +25,11 @@
  (synopsis "Opinionated audio tag editor")
  (description "Otag is a commandline tool to edit meta data of various audio formats.
 
-Currently it supports both ID3v1 and ID3v2 for MP3 files, Ogg Vorbis
+It supports both ID3v1 and ID3v2 for MP3 files, Ogg Vorbis
 comments and ID3 tags and Vorbis comments in FLAC, MPC, Speex,
 WavPack, TrueAudio, WAV, AIFF, MP4 and ASF files i.e whatever taglib
 supports.
 ")
- (depends cmdliner taglib quests inquire)
+ (depends cmdliner taglib quests inquire fileutils)
  (tags
   (cli "mp3 tag editor")))

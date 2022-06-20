@@ -4,7 +4,7 @@ let read_file ~(cond : string ref -> bool)
     ~(parse : string ref -> string option) =
   let cwd = Sys.getcwd () in
 
-  let chan = open_in (Printf.sprintf "%s%sdune-project" cwd Filename.dir_sep) in
+  let chan = open_in (Filename.concat cwd "dune-project") in
 
   let contents = ref "" in
   let ret =
@@ -51,3 +51,17 @@ let version =
   in
 
   lazy (Option.value value ~default:"0.2")
+
+(* let description =
+   let _ =
+     read_file
+       ~cond:(fun contents ->
+         String.starts_with ~prefix:" (description" !contents)
+       ~parse:(fun contents ->
+         let s = String.split_on_char '"' !contents in
+
+         let _ = print_endline (List.nth s 1) in
+
+         None)
+   in
+   lazy "" *)

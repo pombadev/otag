@@ -3,26 +3,30 @@ open Cmdliner
 let format =
   let info =
     Arg.info [ "f"; "format" ] ~docv:"FORMAT"
-      ~doc:"Format the input file(s) are in"
+      ~doc:"Format the input file(s) are in."
   in
   Arg.value (Arg.opt (Arg.some Arg.string) None info)
 
 let path =
   let info =
-    Arg.info [] ~docv:"PATH" ~doc:"Path to audio file(s) or folders(s)"
+    Arg.info [] ~docv:"PATH" ~doc:"Path to audio file(s) or folders(s)."
   in
   Arg.non_empty (Arg.pos_all Arg.file [] info)
 
 let tree =
-  Arg.(
-    value & flag
-    & info [ "t"; "tree-view" ] ~docv:"TREE" ~doc:"Visualize input as tree")
+  Arg.(value & flag & info [ "t"; "tree-view" ] ~doc:"Visualize input as tree.")
 
 let infer_from_path =
   Arg.(
     value & flag
-    & info [ "i"; "infer-from-path" ] ~docv:"INFER"
-        ~doc:"Infer metadata from path")
+    & info [ "i"; "infer-from-path" ] ~doc:"Infer metadata from path.")
+
+let organize =
+  let info =
+    Arg.info [ "o"; "organize" ] ~docv:"DEST"
+      ~doc:"Organize audio(s) to folders."
+  in
+  Arg.value (Arg.opt (Arg.some Arg.dir) None info)
 
 let documentation =
   let envs =
@@ -71,6 +75,8 @@ let cmd =
       ~doc:(Lazy.force DuneProject.synopsis)
       ~exits:[] ~man ~envs
   in
-  Cmd.v info Term.(const Commands.run $ path $ format $ tree $ infer_from_path)
+  Cmd.v info
+    Term.(
+      const Commands.run $ path $ format $ tree $ infer_from_path $ organize)
 
 let main () = Cmd.eval cmd
