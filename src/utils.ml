@@ -22,9 +22,9 @@ let safe_get_int tag file = try tag file with _ -> 0
 type 't grouped_album = { name : string; mutable tracks : (string * 't) list }
 type 'a grouped_by = { artist : string; mutable albums : 'a grouped_album list }
 
-let audio_of_path path =
+let audio_of_path paths =
   let files =
-    path
+    paths
     (* remove duplicates *)
     |> List.sort_uniq compare
     |> List.map get_audio_from_path
@@ -76,7 +76,7 @@ let audio_of_path path =
            in
 
            init)
-         (Hashtbl.create (List.length path))
+         (Hashtbl.create (List.length paths))
   in
   grouped
 
