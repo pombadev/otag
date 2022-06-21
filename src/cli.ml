@@ -18,7 +18,8 @@ let tree =
 
 let infer_from_path =
   Arg.(
-    value & flag
+    value
+    & flag
     & info [ "i"; "infer-from-path" ] ~doc:"Infer metadata from path.")
 
 let organize =

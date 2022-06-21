@@ -1,9 +1,11 @@
 let get_audio_from_path dir =
   let rec loop result = function
     | f :: fs when try Sys.is_directory f with _ -> false ->
-        Sys.readdir f |> Array.to_list
+        Sys.readdir f
+        |> Array.to_list
         |> List.map (Filename.concat f)
-        |> List.append fs |> loop result
+        |> List.append fs
+        |> loop result
     | f :: fs -> loop (f :: result) fs
     | [] -> result
   in
@@ -14,12 +16,12 @@ let get_audio_from_path dir =
         let taglib_file = Taglib.File.open_file `Autodetect file_name in
         Some (file_name, taglib_file)
       with _ ->
-        Printf.eprintf "[OTAG] Skipping '%s' file type detection failed\n"
-          file_name;
+        (* Printf.eprintf "[OTAG] Skipping '%s' file type detection failed\n"
+           file_name; *)
         None)
     files
 
-let safe_get tag file = try tag file with _ -> ""
+let safe_get tag file = try tag file with _ -> "Unknown"
 let safe_get_int tag file = try tag file with _ -> 0
 
 type 't grouped_album = { name : string; mutable tracks : (string * 't) list }

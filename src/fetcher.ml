@@ -35,7 +35,9 @@ module Napster = struct
   let parse data =
     let open Yojson.Basic.Util in
     let discographies =
-      data |> member "albums" |> to_list
+      data
+      |> member "albums"
+      |> to_list
       |> List.map (fun d ->
              let kind = member "type" d |> to_string in
              let id = member "id" d |> to_string in
@@ -45,7 +47,9 @@ module Napster = struct
              let copyright = member "copyright" d |> to_string in
              let artist = member "artistName" d |> to_string in
              let released =
-               member "released" d |> to_string |> String.split_on_char '-'
+               member "released" d
+               |> to_string
+               |> String.split_on_char '-'
                |> List.fold_left
                     (fun init current ->
                       match
@@ -64,7 +68,8 @@ module Napster = struct
                     { year = ""; month = ""; day = "" }
              in
              let links =
-               member "links" d |> to_assoc
+               member "links" d
+               |> to_assoc
                |> List.fold_left
                     (fun init (key, json_obj) ->
                       match key with
@@ -125,8 +130,13 @@ module Napster = struct
 
     let open Yojson.Basic.Util in
     let data =
-      json |> member "search" |> to_assoc
-      |> List.find (fun (a, _) -> match a with "data" -> true | _ -> false)
+      json
+      |> member "search"
+      |> to_assoc
+      |> List.find (fun (a, _) ->
+             match a with
+             | "data" -> true
+             | _ -> false)
     in
 
     let albums = parse (snd data) in
@@ -139,8 +149,12 @@ module Napster = struct
              print_endline ("album = " ^ album.album);
              print_endline ("href = " ^ album.href);
              print_endline
-               ("date = " ^ album.released.year ^ "/" ^ album.released.month
-              ^ "/" ^ album.released.day);
+               ("date = "
+               ^ album.released.year
+               ^ "/"
+               ^ album.released.month
+               ^ "/"
+               ^ album.released.day);
              print_endline ("label = " ^ album.label);
              print_endline ("copyright = " ^ album.copyright);
              print_endline ("id = " ^ album.id))

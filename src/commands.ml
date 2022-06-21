@@ -3,52 +3,50 @@ open Utils
 let treeify ~paths =
   let grouped = audio_of_path paths in
 
-  let _ =
-    let count = ref 0 in
-    let artist_count = Hashtbl.length grouped in
+  let count = ref 0 in
+  let artist_count = Hashtbl.length grouped in
 
-    Hashtbl.iter
-      (fun _ grouped ->
-        incr count;
+  Hashtbl.iter
+    (fun _ grouped ->
+      incr count;
 
-        Printf.printf "%s\n" grouped.artist;
+      Printf.printf "%s\n" grouped.artist;
 
-        let album_count = List.length grouped.albums in
+      let album_count = List.length grouped.albums in
 
-        grouped.albums
-        |> List.iteri (fun index album ->
-               let current_artist = index + 1 in
-               let pad =
-                 if !count = artist_count then
-                   match List.nth_opt grouped.albums current_artist with
-                   | None -> "└──"
-                   | Some _ -> "├──"
-                 else "├──"
-               in
+      grouped.albums
+      |> List.iteri (fun index album ->
+             let current_artist = index + 1 in
+             let pad =
+               if !count = artist_count then
+                 match List.nth_opt grouped.albums current_artist with
+                 | None -> "└──"
+                 | Some _ -> "├──"
+               else
+                 "├──"
+             in
 
-               Printf.printf "%s %s\n" pad album.name;
+             Printf.printf "%s %s\n" pad album.name;
 
-               let tracks_count = List.length album.tracks in
+             let tracks_count = List.length album.tracks in
 
-               album.tracks
-               |> List.iteri (fun index (_, track) ->
-                      let current_track = index + 1 in
-                      let stop =
-                        !count = artist_count && current_artist = album_count
-                      in
+             album.tracks
+             |> List.iteri (fun index (_, track) ->
+                    let current_track = index + 1 in
+                    let stop =
+                      !count = artist_count && current_artist = album_count
+                    in
 
-                      let pad =
-                        if current_track = tracks_count then "└──" else "├──"
-                      in
+                    let pad =
+                      if current_track = tracks_count then "└──" else "├──"
+                    in
 
-                      let bar = if stop then " " else "│" in
+                    let bar = if stop then " " else "│" in
 
-                      Printf.printf "%s  %s  [%d] %s\n" bar pad
-                        (safe_get_int Taglib.tag_track track)
-                        (safe_get Taglib.tag_title track))))
-      grouped
-  in
-  ()
+                    Printf.printf "%s %s [%d] %s\n" bar pad
+                      (safe_get_int Taglib.tag_track track)
+                      (safe_get Taglib.tag_title track))))
+    grouped
 
 let tag ~paths ~format ~infer =
   Printf.printf "format = %s\ninfer = %b\n"
@@ -189,7 +187,10 @@ let run paths format tree infer organize =
   let action =
     match tree with
     | true -> `Tree
-    | false -> ( match organize with Some s -> `Organize s | None -> `Tag)
+    | false -> (
+        match organize with
+        | Some s -> `Organize s
+        | None -> `Tag)
   in
 
   match action with

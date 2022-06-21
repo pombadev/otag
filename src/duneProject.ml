@@ -50,7 +50,7 @@ let version =
             Some s)
   in
 
-  lazy (Option.value value ~default:"0.2")
+  lazy (Option.value value ~default:"0.3")
 
 (* let description =
    let _ =
