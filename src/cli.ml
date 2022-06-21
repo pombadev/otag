@@ -42,9 +42,7 @@ let documentation =
   let man =
     [
       `S Manpage.s_description;
-      `P
-        "$(tname) is a commandline tool to edit meta data of various audio \
-         formats.";
+      `P ("$(tname)" ^ Lazy.force DuneProject.synopsis);
       `Noblank;
       `P
         "Currently it supports both ID3v1 and ID3v2 for MP3 files, Ogg Vorbis \
@@ -74,16 +72,18 @@ let documentation =
   in
   (man, envs)
 
-let cmd =
-  let man, envs = documentation in
-  let info =
-    Cmd.info "otag"
-      ~version:(Lazy.force DuneProject.version)
-      ~doc:(Lazy.force DuneProject.synopsis)
-      ~exits:[] ~man ~envs
+let main () =
+  let cmd =
+    let man, envs = documentation in
+    let info =
+      Cmd.info "otag"
+        ~version:(Lazy.force DuneProject.version)
+        ~doc:(Lazy.force DuneProject.synopsis)
+        ~exits:[] ~man ~envs
+    in
+    Cmd.v info
+      Term.(
+        const Commands.run $ path $ format $ tree $ infer_from_path $ organize)
   in
-  Cmd.v info
-    Term.(
-      const Commands.run $ path $ format $ tree $ infer_from_path $ organize)
 
-let main () = Cmd.eval cmd
+  Cmd.eval cmd

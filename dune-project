@@ -22,8 +22,8 @@
 
 (package
  (name otag)
- (synopsis "Opinionated audio tag editor")
- (description "Otag is a commandline tool to edit meta data of various audio formats.
+ (synopsis "Opinionated audio metadata editor")
+ (description "Otag is a commandline tool to edit metadata of various audio formats.
 
 It supports both ID3v1 and ID3v2 for MP3 files, Ogg Vorbis
 comments and ID3 tags and Vorbis comments in FLAC, MPC, Speex,

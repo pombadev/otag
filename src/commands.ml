@@ -1,5 +1,6 @@
 open Utils
 
+(** Print valid audio files as tree to stdout *)
 let treeify ~paths =
   let grouped = audio_of_path paths in
 
@@ -48,6 +49,7 @@ let treeify ~paths =
                       (safe_get Taglib.tag_title track))))
     grouped
 
+(** Update metadata of valid audio files *)
 let tag ~paths ~format ~infer =
   let _format = format in
 
@@ -129,6 +131,7 @@ let tag ~paths ~format ~infer =
 
       Lwt_main.run (Lwt_list.iter_p (fun f -> f ()) tasks)
 
+(** Move files to `Artist/Album/Tracks` structure, getting metadata from the embedded data *)
 let organizer ~paths ~dest =
   let mkdir dir =
     let exist = try Sys.is_directory dir with _ -> false in
@@ -172,6 +175,7 @@ let organizer ~paths ~dest =
                     in
                     mv files dir))))
 
+(** Main entry point for the cli *)
 let run paths format tree infer organize =
   let action =
     match tree with
