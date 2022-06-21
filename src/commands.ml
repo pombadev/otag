@@ -49,96 +49,85 @@ let treeify ~paths =
     grouped
 
 let tag ~paths ~format ~infer =
-  Printf.printf "format = %s\ninfer = %b\n"
-    (Option.value format ~default:"default")
-    infer;
-  let grouped = audio_of_path paths in
-  let discog =
-    Hashtbl.fold
-      (fun artist group init ->
-        let albums = group.albums |> List.map (fun al -> al.name) in
+  let _format = format in
 
-        init @ [ (artist, albums) ])
-      grouped []
-  in
-  let () =
-    discog
-    |> List.iter (fun (artist, albums) ->
-           Printf.printf "'%s' as '%d' album(s)\n%s\n" artist
-             (List.length albums)
-             (String.concat "\n" albums))
-  in
+  match infer with
+  | true ->
+      paths
+      |> List.map get_audio_from_path
+      |> List.iter (fun files ->
+             files
+             |> List.iter (fun (path, file) ->
+                    let parts =
+                      String.split_on_char (String.get Filename.dir_sep 0) path
+                      |> List.rev
+                    in
 
-  let open Fetcher.Napster in
-  let tasks =
-    discog
-    |> List.map (fun (_, albums) ->
-           albums
-           |> List.map (fun album ->
-                  let res =
-                    Fetcher.Napster.search ~query_type:`Album ~query:album ()
-                  in
+                    let modified = ref false in
 
-                  let ans =
-                    Utils.prompt
-                      ~choices:
-                        (res |> List.map (fun a -> a.album ^ " by " ^ a.artist))
-                      ~msg:"Multiple matches found, please select one" ()
-                  in
+                    let _ =
+                      match List.nth_opt parts 2 with
+                      | Some artist ->
+                          Taglib.tag_set_artist file artist;
+                          modified := true
+                      | None -> ()
+                    in
 
-                  print_endline ("Answer " ^ ans);
+                    let _ =
+                      match List.nth_opt parts 1 with
+                      | Some album ->
+                          Taglib.tag_set_album file album;
+                          modified := true
+                      | None -> ()
+                    in
 
-                  fun () -> Lwt.return_unit))
-    |> List.flatten
-  in
+                    let _ =
+                      match List.nth_opt parts 0 with
+                      | Some track ->
+                          Taglib.tag_set_title file track;
+                          modified := true
+                      | None -> ()
+                    in
 
-  let _ = Lwt_main.run (Lwt_list.iter_p (fun f -> f ()) tasks) in
-  ()
-(* in
-   let () =
-     grouped
-     |> Hashtbl.iter (fun artist group ->
-            print_endline ("Artist " ^ artist);
+                    if !modified then
+                      Taglib.file_save file |> ignore))
+  | false ->
+      let grouped = audio_of_path paths in
 
-            group.albums
-            |> List.iter (fun album ->
-                   album.tracks
-                   |> List.iter (fun track ->
-                          Printf.printf "[%d] %s\n"
-                            (safe_get_int Taglib.tag_track track)
-                            (safe_get Taglib.tag_title track)))) *)
-(* path
-   |> List.map get_audio_from_path
-   |> List.iter (fun path_files ->
-          path_files
-          |> List.iter (fun (path, file) ->
-                 if infer then (
-                   let s =
-                     String.split_on_char
-                       (String.get Filename.dir_sep 0)
-                       path
-                     |> List.rev
-                   in
+      let discog =
+        Hashtbl.fold
+          (fun artist group init ->
+            let albums = group.albums |> List.map (fun album -> album.name) in
 
-                   let artist =
-                     Option.value (List.nth_opt s 2) ~default:""
-                   in
-                   let album =
-                     Option.value (List.nth_opt s 1) ~default:""
-                   in
-                   let track =
-                     Option.value (List.nth_opt s 0) ~default:""
-                   in
+            init @ [ (artist, albums) ])
+          grouped []
+      in
+      let open Fetcher.Napster in
+      let tasks =
+        discog
+        |> List.map (fun (_, albums) ->
+               albums
+               |> List.map (fun album ->
+                      let res =
+                        Fetcher.Napster.search ~query_type:`Album ~query:album
+                          ()
+                      in
 
-                   Printf.printf
-                     "Inferred\ntrack = %s\nalbum = %s\nartist = %s\n\n"
-                     track album artist;
+                      let ans =
+                        Utils.prompt
+                          ~choices:
+                            (res
+                            |> List.map (fun a -> a.album ^ " by " ^ a.artist))
+                          ~msg:"Multiple matches found, please select one" ()
+                      in
 
-                   Taglib.tag_set_album file album;
-                   Taglib.tag_set_artist file artist;
-                   Taglib.tag_set_title file track;
-                   Taglib.file_save file |> ignore;
-                   Taglib.File.file_save file |> ignore))) *)
+                      print_endline ("Answer " ^ ans);
+
+                      fun () -> Lwt.return_unit))
+        |> List.flatten
+      in
+
+      Lwt_main.run (Lwt_list.iter_p (fun f -> f ()) tasks)
 
 let organizer ~paths ~dest =
   let mkdir dir =

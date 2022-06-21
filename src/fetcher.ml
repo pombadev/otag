@@ -20,7 +20,7 @@ module Napster = struct
   type links_t = { tracks : href_t; artists : href_t }
   type date_t = { year : string; month : string; day : string }
 
-  type napster_search = {
+  type response = {
     id : string;
     href : string;
     album : string;
@@ -32,6 +32,7 @@ module Napster = struct
     artist : string;
   }
 
+  (** Parse response from napster to json *)
   let parse data =
     let open Yojson.Basic.Util in
     let discographies =

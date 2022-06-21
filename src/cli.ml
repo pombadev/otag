@@ -20,7 +20,13 @@ let infer_from_path =
   Arg.(
     value
     & flag
-    & info [ "i"; "infer-from-path" ] ~doc:"Infer metadata from path.")
+    & info [ "i"; "infer-from-path" ]
+        ~doc:
+          {|
+        Infer metadata from path.
+
+        Files are expected to be in `Artist/Album/Track` format.
+        |})
 
 let organize =
   let info =
