@@ -13,7 +13,10 @@ let get_audio_from_path dir =
       try
         let taglib_file = Taglib.File.open_file `Autodetect file_name in
         Some (file_name, taglib_file)
-      with _ -> None)
+      with _ ->
+        Printf.eprintf "[OTAG] Skipping '%s' file type detection failed\n"
+          file_name;
+        None)
     files
 
 let safe_get tag file = try tag file with _ -> ""

@@ -148,33 +148,42 @@ let organizer ~paths ~dest =
     if not exist then FileUtil.mkdir ~parent:true dir
   in
 
+  let mv src dest =
+    let copied =
+      try
+        FileUtil.cp ~force:Force ~recurse:true src dest;
+        true
+      with exn ->
+        let msg = Printexc.to_string_default exn in
+
+        Printf.eprintf "Unable to copy:\n  %s\n" msg;
+        false
+    in
+
+    if copied then
+      try FileUtil.rm ~force:Force ~recurse:true src
+      with exn ->
+        let msg = Printexc.to_string_default exn in
+
+        Printf.eprintf "Unable to move:\n  %s\n" msg
+  in
+
   audio_of_path paths
   |> Hashtbl.iter (fun artist group ->
-         let dir = Filename.concat dest artist in
-         mkdir dir;
+         if String.length artist > 0 then (
+           let dir = Filename.concat dest artist in
+           mkdir dir;
 
-         group.albums
-         |> List.iter (fun album ->
-                let dir = Filename.concat dir album.name in
-                mkdir dir;
+           group.albums
+           |> List.iter (fun album ->
+                  if String.length album.name > 0 then (
+                    let dir = Filename.concat dir album.name in
+                    mkdir dir;
 
-                let files, _ =
-                  List.fold_right
-                    (fun (path, file) init ->
-                      let ps = fst init in
-                      let fs = snd init in
-
-                      (ps @ [ path ], fs @ [ file ]))
-                    album.tracks ([], [])
-                in
-
-                try FileUtil.cp ~recurse:true files dir
-                with _ -> (
-                  Printf.eprintf "Unable to copy files to %s\n" dir;
-
-                  try FileUtil.rm ~recurse:true files
-                  with _ ->
-                    Printf.eprintf "Error removing copied files to %s\n" dir)))
+                    let files =
+                      album.tracks |> List.map (fun (path, _) -> path)
+                    in
+                    mv files dir))))
 
 let run paths format tree infer organize =
   let action =
