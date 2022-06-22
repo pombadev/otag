@@ -149,27 +149,7 @@ let organizer opts =
 
   let mkdir dir =
     let exist = try Sys.is_directory dir with _ -> false in
-    if not exist then FileUtil.mkdir ~parent:true dir
-  in
-
-  let mv src dest =
-    let copied =
-      try
-        FileUtil.cp ~force:Force ~recurse:true src dest;
-        true
-      with exn ->
-        let msg = Printexc.to_string_default exn in
-
-        Printf.eprintf "Unable to copy:\n  %s\n" msg;
-        false
-    in
-
-    if copied then
-      try FileUtil.rm ~force:Force ~recurse:true src
-      with exn ->
-        let msg = Printexc.to_string_default exn in
-
-        Printf.eprintf "Unable to move:\n  %s\n" msg
+    if not exist then Unix.mkdir dir 0o0777
   in
 
   audio_of_path paths
@@ -184,10 +164,10 @@ let organizer opts =
                     let dir = Filename.concat dir album.name in
                     mkdir dir;
 
-                    let files =
-                      album.tracks |> List.map (fun (path, _) -> path)
-                    in
-                    mv files dir))))
+                    album.tracks
+                    |> List.iter (fun (path, _) ->
+                           Unix.rename path
+                             (Filename.concat dir (Filename.basename path)))))))
 
 (** Main entry point for the cli *)
 let run paths format tree infer organize =

@@ -1,6 +1,6 @@
 let content_type = ("Content-Type", "application/json")
 
-let user_agent =
+let user_agent () =
   let os, os_ver = Sys.(os_type, ocaml_version) in
   let app_ver = Opam.File.version in
   let ua = Printf.sprintf "OTag/%s (%s) %s" app_ver os os_ver in
@@ -120,7 +120,7 @@ module Napster = struct
     in
     Printf.printf "Parsed to %s\n" url;
 
-    let response = Quests.get ~headers:[ content_type; user_agent ] url in
+    let response = Quests.get ~headers:[ content_type; user_agent () ] url in
 
     let body = Lwt_main.run response in
 

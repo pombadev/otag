@@ -30,6 +30,6 @@ comments and ID3 tags and Vorbis comments in FLAC, MPC, Speex,
 WavPack, TrueAudio, WAV, AIFF, MP4 and ASF files i.e whatever taglib
 supports.
 ")
- (depends cmdliner taglib quests inquire fileutils opam-file-format)
+ (depends cmdliner taglib quests inquire opam-file-format)
  (tags
   (cli "mp3 tag editor")))
