@@ -42,13 +42,9 @@ let documentation =
   let man =
     [
       `S Manpage.s_description;
-      `P ("$(tname)" ^ Lazy.force DuneProject.synopsis);
+      `P Opam.File.synopsis;
       `Noblank;
-      `P
-        "Currently it supports both ID3v1 and ID3v2 for MP3 files, Ogg Vorbis \
-         comments and ID3 tags and Vorbis comments in FLAC, MPC, Speex, \
-         WavPack, TrueAudio, WAV, AIFF, MP4 and ASF files i.e whatever taglib \
-         supports.";
+      `P Opam.File.description;
       `S Manpage.s_examples;
       `Pre "$(tname) test.mp3";
       `Noblank;
@@ -76,9 +72,7 @@ let main () =
   let cmd =
     let man, envs = documentation in
     let info =
-      Cmd.info "otag"
-        ~version:(Lazy.force DuneProject.version)
-        ~doc:(Lazy.force DuneProject.synopsis)
+      Cmd.info "otag" ~version:Opam.File.version ~doc:Opam.File.synopsis
         ~exits:[] ~man ~envs
     in
     Cmd.v info

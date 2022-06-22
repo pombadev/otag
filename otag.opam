@@ -23,6 +23,7 @@ depends: [
   "quests"
   "inquire"
   "fileutils"
+  "opam-file-format"
   "odoc" {with-doc}
 ]
 build: [

@@ -1,10 +1,21 @@
 open Utils
 
+type options = {
+  paths : string list;
+  format : string option;
+  tree : bool;
+  infer : bool;
+  organize_dest : string;
+}
+
 (** Print valid audio files as tree to stdout *)
-let treeify ~paths =
+let treeify opts =
+  let { paths; _ } = opts in
+
   let grouped = audio_of_path paths in
 
   let count = ref 0 in
+
   let artist_count = Hashtbl.length grouped in
 
   Hashtbl.iter
@@ -50,9 +61,10 @@ let treeify ~paths =
     grouped
 
 (** Update metadata of valid audio files *)
-let tag ~paths ~format ~infer =
-  let _format = format in
+let tag opts =
+  let { paths; infer; _ } = opts in
 
+  (* let _format = format in *)
   match infer with
   | true ->
       paths
@@ -132,7 +144,9 @@ let tag ~paths ~format ~infer =
       Lwt_main.run (Lwt_list.iter_p (fun f -> f ()) tasks)
 
 (** Move files to `Artist/Album/Tracks` structure, getting metadata from the embedded data *)
-let organizer ~paths ~dest =
+let organizer opts =
+  let { paths; organize_dest; _ } = opts in
+
   let mkdir dir =
     let exist = try Sys.is_directory dir with _ -> false in
     if not exist then FileUtil.mkdir ~parent:true dir
@@ -161,7 +175,7 @@ let organizer ~paths ~dest =
   audio_of_path paths
   |> Hashtbl.iter (fun artist group ->
          if String.length artist > 0 then (
-           let dir = Filename.concat dest artist in
+           let dir = Filename.concat organize_dest artist in
            mkdir dir;
 
            group.albums
@@ -177,6 +191,8 @@ let organizer ~paths ~dest =
 
 (** Main entry point for the cli *)
 let run paths format tree infer organize =
+  let opts = { paths; format; tree; infer; organize_dest = "" } in
+
   let action =
     match tree with
     | true -> `Tree
@@ -187,6 +203,8 @@ let run paths format tree infer organize =
   in
 
   match action with
-  | `Tree -> treeify ~paths
-  | `Organize dest -> organizer ~paths ~dest
-  | `Tag -> tag ~paths ~format ~infer
+  | `Tree -> treeify opts
+  | `Organize dest ->
+      let opts = { opts with organize_dest = dest } in
+      organizer opts
+  | `Tag -> tag opts

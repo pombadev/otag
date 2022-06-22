@@ -1,3 +1,43 @@
+(** Authored by Rudi Grinberg, licensed under MIT. *)
+module StringExtra = struct
+  exception Exit
+  exception Found_int of int
+
+  let substr_eq ?(start = 0) s ~pattern =
+    try
+      for i = 0 to String.length pattern - 1 do
+        if s.[i + start] <> pattern.[i] then raise Exit
+      done;
+      true
+    with _ -> false
+
+  let find_from ?(start = 0) str ~pattern =
+    try
+      for i = start to String.length str - String.length pattern do
+        if substr_eq ~start:i str ~pattern then
+          raise (Found_int i)
+      done;
+      None
+    with
+    | Found_int i -> Some i
+    | _ -> None
+
+  let replace_all str ~pattern ~with_ =
+    let slen, plen = String.(length str, length pattern) in
+    let buf = Buffer.create slen in
+    let rec loop i =
+      match find_from ~start:i str ~pattern with
+      | None ->
+          Buffer.add_substring buf str i (slen - i);
+          Buffer.contents buf
+      | Some j ->
+          Buffer.add_substring buf str i (j - i);
+          Buffer.add_string buf with_;
+          loop (j + plen)
+    in
+    loop 0
+end
+
 let get_audio_from_path dir =
   let rec loop result = function
     | f :: fs when try Sys.is_directory f with _ -> false ->

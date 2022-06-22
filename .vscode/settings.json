@@ -6,6 +6,7 @@
         "cond",
         "getenv",
         "iteri",
+        "pelem",
         "sdocs",
         "sdune",
         "treeify"

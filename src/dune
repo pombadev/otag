@@ -1,4 +1,4 @@
 (executable
  (public_name otag)
  (name main)
- (libraries cmdliner taglib quests inquire fileutils))
+ (libraries cmdliner taglib quests inquire fileutils opam-file-format))

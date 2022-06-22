@@ -2,7 +2,7 @@ let content_type = ("Content-Type", "application/json")
 
 let user_agent =
   let os, os_ver = Sys.(os_type, ocaml_version) in
-  let app_ver = Lazy.force DuneProject.version in
+  let app_ver = Opam.File.version in
   let ua = Printf.sprintf "OTag/%s (%s) %s" app_ver os os_ver in
   ("User-Agent", ua)
 
