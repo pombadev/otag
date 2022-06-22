@@ -58,8 +58,8 @@ let documentation =
       `P "Pomba Magar <pomba.magar@gmail.com>";
       `S Manpage.s_bugs;
       `P
-        "Improve docs, code and suggestions, bugs report at \
-         https://github.com/pjmp/otag";
+        ("Improve docs, code and suggestions, bugs report at "
+        ^ Opam.File.homepage);
       `S Manpage.s_see_also;
       `P "TagLib - https://taglib.org";
       `Noblank;
