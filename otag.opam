@@ -23,6 +23,7 @@ depends: [
   "quests"
   "inquire"
   "opam-file-format"
+  "ppx_blob"
   "odoc" {with-doc}
 ]
 build: [

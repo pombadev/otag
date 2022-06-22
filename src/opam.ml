@@ -10,7 +10,7 @@ end = struct
   type shape = { version : string; synopsis : string; description : string }
 
   let file =
-    let file = OpamParser.FullPos.file "otag.opam" in
+    let file = OpamParser.FullPos.string [%blob "otag.opam"] "otag.opam" in
 
     List.fold_right
       (fun item init ->
