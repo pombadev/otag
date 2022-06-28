@@ -61,8 +61,17 @@ let get_audio_from_path dir =
         None)
     files
 
-let safe_get tag file = try tag file with _ -> "Unknown"
-let safe_get_int tag file = try tag file with _ -> 0
+let random_state =
+  let _ = Random.self_init () in
+  Printf.sprintf "%LX" (Random.bits64 ())
+
+let safe_get tag file = try tag file with _ -> random_state
+
+let safe_get_int tag file =
+  try
+    let track = tag file in
+    string_of_int track
+  with _ -> random_state
 
 type 't grouped_album = { name : string; mutable tracks : (string * 't) list }
 type 'a grouped_by = { artist : string; mutable albums : 'a grouped_album list }
@@ -113,9 +122,12 @@ let audio_of_path paths =
                        g_album.tracks <-
                          g_album.tracks @ [ (path, current) ]
                          |> List.sort (fun (_, this) (_, that) ->
+                                let safe_get_int tag file =
+                                  try tag file with _ -> 0
+                                in
                                 let no_a = safe_get_int Taglib.tag_track this in
                                 let no_b = safe_get_int Taglib.tag_track that in
-                                if no_a < no_b then -1 else 1)
+                                compare no_a no_b)
                  in
                  ()
            in

@@ -25,7 +25,7 @@ let infer_from_path =
           {|
         Infer metadata from path.
 
-        Files are expected to be in `Artist/Album/Track` format.
+        Files are expected to be in `Artist/Album/Track` file system.
         |})
 
 let organize =
@@ -34,6 +34,14 @@ let organize =
       ~doc:"Organize audio(s) to folders."
   in
   Arg.value (Arg.opt (Arg.some Arg.dir) None info)
+
+let dry_run =
+  let info =
+    Arg.info [ "dry-run" ]
+      ~doc:
+        "Run the command without doing anything; just show what would happen."
+  in
+  Arg.value (Arg.flag info)
 
 let documentation =
   let envs =
@@ -77,7 +85,13 @@ let main () =
     in
     Cmd.v info
       Term.(
-        const Commands.run $ path $ format $ tree $ infer_from_path $ organize)
+        const Commands.run
+        $ path
+        $ format
+        $ tree
+        $ infer_from_path
+        $ organize
+        $ dry_run)
   in
 
   Cmd.eval cmd

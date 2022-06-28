@@ -1,7 +1,7 @@
 (executable
  (public_name otag)
  (name main)
- (libraries cmdliner taglib quests inquire opam-file-format)
+ (libraries cmdliner taglib quests inquire opam-file-format spectrum)
  (preprocess
   (pps ppx_blob))
  (preprocessor_deps

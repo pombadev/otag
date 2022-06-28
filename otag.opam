@@ -24,6 +24,7 @@ depends: [
   "inquire"
   "opam-file-format"
   "ppx_blob"
+  "spectrum"
   "odoc" {with-doc}
 ]
 build: [

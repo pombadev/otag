@@ -6,6 +6,7 @@ type options = {
   tree : bool;
   infer : bool;
   organize_dest : string;
+  dry_run : bool;
 }
 
 (** Print valid audio files as tree to stdout *)
@@ -22,7 +23,7 @@ let treeify opts =
     (fun _ grouped ->
       incr count;
 
-      Printf.printf "%s\n" grouped.artist;
+      Spectrum.Simple.printf "@{<bold,yellow>%s@}\n" grouped.artist;
 
       let album_count = List.length grouped.albums in
 
@@ -38,7 +39,7 @@ let treeify opts =
                  "├──"
              in
 
-             Printf.printf "%s %s\n" pad album.name;
+             Spectrum.Simple.printf "%s @{<bold,green>%s@}\n" pad album.name;
 
              let tracks_count = List.length album.tracks in
 
@@ -55,14 +56,20 @@ let treeify opts =
 
                     let bar = if stop then " " else "│" in
 
-                    Printf.printf "%s %s [%d] %s\n" bar pad
+                    Spectrum.Simple.printf
+                      "%s %s @{<fuchsia>[%s]@} @{<bold,teal>%s@}\n" bar pad
                       (safe_get_int Taglib.tag_track track)
                       (safe_get Taglib.tag_title track))))
     grouped
 
 (** Update metadata of valid audio files *)
 let tag opts =
-  let { paths; infer; _ } = opts in
+  let { paths; infer; format; _ } = opts in
+
+  print_endline
+    (match format with
+    | Some fmt -> fmt
+    | None -> "default");
 
   (* let _format = format in *)
   match infer with
@@ -73,9 +80,17 @@ let tag opts =
              files
              |> List.iter (fun (path, file) ->
                     let parts =
-                      String.split_on_char (String.get Filename.dir_sep 0) path
+                      path
+                      |> String.split_on_char (String.get Filename.dir_sep 0)
                       |> List.rev
                     in
+
+                    if List.length parts = 0 then
+                      failwith
+                        (Printf.sprintf
+                           "'%s' should be nested like this \
+                            'Artist/Album/Track'"
+                           path);
 
                     let modified = ref false in
 
@@ -145,7 +160,7 @@ let tag opts =
 
 (** Move files to `Artist/Album/Tracks` structure, getting metadata from the embedded data *)
 let organizer opts =
-  let { paths; organize_dest; _ } = opts in
+  let { paths; organize_dest; dry_run; _ } = opts in
 
   let mkdir dir =
     let exist = try Sys.is_directory dir with _ -> false in
@@ -155,23 +170,65 @@ let organizer opts =
   audio_of_path paths
   |> Hashtbl.iter (fun artist group ->
          if String.length artist > 0 then (
-           let dir = Filename.concat organize_dest artist in
-           mkdir dir;
+           let artist_dir = Filename.concat organize_dest artist in
+           mkdir artist_dir;
 
            group.albums
            |> List.iter (fun album ->
                   if String.length album.name > 0 then (
-                    let dir = Filename.concat dir album.name in
-                    mkdir dir;
+                    let album_dir =
+                      let maybe_year =
+                        album.tracks
+                        |> List.find_opt (fun (_, track) ->
+                               try
+                                 let _ = Taglib.tag_year track in
+                                 true
+                               with _ -> false)
+                      in
+
+                      let prefix =
+                        match maybe_year with
+                        | None -> ""
+                        | Some (_, track) ->
+                            Printf.sprintf "[%s] "
+                              (safe_get_int Taglib.tag_year track)
+                      in
+
+                      Filename.concat artist_dir (prefix ^ album.name)
+                    in
+
+                    mkdir album_dir;
 
                     album.tracks
-                    |> List.iter (fun (path, _) ->
-                           Unix.rename path
-                             (Filename.concat dir (Filename.basename path)))))))
+                    |> List.iter (fun (path, track) ->
+                           let title_from_metadata =
+                             safe_get Taglib.tag_title track
+                           in
+
+                           let file =
+                             let file_name = Filename.basename path in
+
+                             let name =
+                               if title_from_metadata <> Utils.random_state then
+                                 let ext = Filename.extension file_name in
+                                 title_from_metadata ^ ext
+                               else
+                                 file_name
+                             in
+
+                             name
+                           in
+
+                           let dest = Filename.concat album_dir file in
+
+                           if dry_run then
+                             Printf.printf "[RENAME] %s ➜ %s\n" path dest
+                           else
+                             Unix.rename path dest)))))
 
 (** Main entry point for the cli *)
-let run paths format tree infer organize =
-  let opts = { paths; format; tree; infer; organize_dest = "" } in
+let run paths format tree infer organize dry_run =
+  let opts = { paths; format; tree; infer; organize_dest = ""; dry_run } in
 
   let action =
     match tree with
