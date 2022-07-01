@@ -179,15 +179,13 @@ let organizer opts =
   audio_files
   |> Hashtbl.iter (fun artist group ->
          if String.length artist > 0 then (
-           print_endline ("Artist: " ^ artist);
-
            let artist_dir = Filename.concat organize_dest artist in
            if not dry_run then mkdir artist_dir;
 
            group.albums
            |> List.iter (fun album ->
                   if String.length album.name > 0 then (
-                    print_endline ("Album: " ^ album.name);
+                    colorify "@{<bold>%s by %s@}\n" album.name artist;
 
                     let album_dir =
                       let maybe_year =
@@ -211,13 +209,13 @@ let organizer opts =
                     if not dry_run then mkdir album_dir;
 
                     album.tracks
-                    |> List.iter (fun (path, track) ->
+                    |> List.iter (fun (src, track) ->
                            let title_from_metadata =
                              safe_get Taglib.tag_title track
                            in
 
                            let file =
-                             let file_name = Filename.basename path in
+                             let file_name = Filename.basename src in
 
                              let name =
                                if title_from_metadata <> Utils.random_state then
@@ -231,16 +229,14 @@ let organizer opts =
 
                            let dest = Filename.concat album_dir file in
 
-                           match path = dest with
-                           | true -> print_endline "nothing to do"
+                           match src = dest with
+                           | true -> colorify "@{<dim>%s@} @{<green>✔@}\n" src
                            | false -> begin
                                match dry_run with
                                | true ->
-                                   (* colorify "@{<green>+ %s@}\n@{<red>- %s@}\n"
-                                      dest path; *)
-                                   print_endline
-                                     ("Rename from\n" ^ path ^ "\nTo\n" ^ dest)
-                               | false -> Unix.rename path dest
+                                   colorify "@{<dim>%s@}\n↳ @{<dim>%s@}\n" src
+                                     dest
+                               | false -> Unix.rename src dest
                              end)))))
 
 (** Main entry point for the cli *)
