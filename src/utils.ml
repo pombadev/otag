@@ -1,4 +1,5 @@
-(** Authored by Rudi Grinberg, licensed under MIT. *)
+(** All the codes in the [StringExtra] modules is authored by Rudi Grinberg.
+Part of {{:https://github.com/rgrinberg/stringext}stringext}, licensed under MIT.*)
 module StringExtra = struct
   exception Exit
   exception Found_int of int
@@ -14,8 +15,7 @@ module StringExtra = struct
   let find_from ?(start = 0) str ~pattern =
     try
       for i = start to String.length str - String.length pattern do
-        if substr_eq ~start:i str ~pattern then
-          raise (Found_int i)
+        if substr_eq ~start:i str ~pattern then raise (Found_int i)
       done;
       None
     with
@@ -38,6 +38,7 @@ module StringExtra = struct
     loop 0
 end
 
+(** Recursively walk directories and return list of path * [Taglib.t] *)
 let get_audio_from_path dir =
   let rec loop result = function
     | f :: fs when try Sys.is_directory f with _ -> false ->
@@ -85,6 +86,8 @@ let audio_of_path paths =
     |> List.flatten
   in
 
+  let get_track tag file = try tag file with _ -> 0 in
+
   let grouped =
     files
     |> List.fold_left
@@ -122,11 +125,8 @@ let audio_of_path paths =
                        g_album.tracks <-
                          g_album.tracks @ [ (path, current) ]
                          |> List.sort (fun (_, this) (_, that) ->
-                                let safe_get_int tag file =
-                                  try tag file with _ -> 0
-                                in
-                                let no_a = safe_get_int Taglib.tag_track this in
-                                let no_b = safe_get_int Taglib.tag_track that in
+                                let no_a = get_track Taglib.tag_track this in
+                                let no_b = get_track Taglib.tag_track that in
                                 compare no_a no_b)
                  in
                  ()

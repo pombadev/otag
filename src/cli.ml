@@ -7,7 +7,7 @@ let format =
   in
   Arg.value (Arg.opt (Arg.some Arg.string) None info)
 
-let path =
+let paths =
   let info =
     Arg.info [] ~docv:"PATH" ~doc:"Path to audio file(s) or folders(s)."
   in
@@ -86,7 +86,7 @@ let main () =
     Cmd.v info
       Term.(
         const Commands.run
-        $ path
+        $ paths
         $ format
         $ tree
         $ infer_from_path

@@ -9,6 +9,8 @@ type options = {
   dry_run : bool;
 }
 
+let colorify = Spectrum.Simple.printf
+
 (** Print valid audio files as tree to stdout *)
 let treeify opts =
   let { paths; _ } = opts in
@@ -23,7 +25,7 @@ let treeify opts =
     (fun _ grouped ->
       incr count;
 
-      Spectrum.Simple.printf "@{<bold,yellow>%s@}\n" grouped.artist;
+      colorify "@{<bold,yellow>%s@}\n" grouped.artist;
 
       let album_count = List.length grouped.albums in
 
@@ -35,11 +37,10 @@ let treeify opts =
                  match List.nth_opt grouped.albums current_artist with
                  | None -> "└──"
                  | Some _ -> "├──"
-               else
-                 "├──"
+               else "├──"
              in
 
-             Spectrum.Simple.printf "%s @{<bold,green>%s@}\n" pad album.name;
+             colorify "%s @{<bold,green>%s@}\n" pad album.name;
 
              let tracks_count = List.length album.tracks in
 
@@ -56,8 +57,8 @@ let treeify opts =
 
                     let bar = if stop then " " else "│" in
 
-                    Spectrum.Simple.printf
-                      "%s %s @{<fuchsia>[%s]@} @{<bold,teal>%s@}\n" bar pad
+                    colorify "%s %s @{<fuchsia>[%s]@} @{<bold,teal>%s@}\n" bar
+                      pad
                       (safe_get_int Taglib.tag_track track)
                       (safe_get Taglib.tag_title track))))
     grouped
@@ -118,8 +119,7 @@ let tag opts =
                       | None -> ()
                     in
 
-                    if !modified then
-                      Taglib.file_save file |> ignore))
+                    if !modified then Taglib.file_save file |> ignore))
   | false ->
       let grouped = audio_of_path paths in
 
@@ -158,46 +158,57 @@ let tag opts =
 
       Lwt_main.run (Lwt_list.iter_p (fun f -> f ()) tasks)
 
+(* type summaries = { artist : string; tracks : string list; released : string } *)
+
 (** Move files to `Artist/Album/Tracks` structure, getting metadata from the embedded data *)
 let organizer opts =
   let { paths; organize_dest; dry_run; _ } = opts in
 
+  let dir_exist dir = try Sys.is_directory dir with _ -> false in
+
   let mkdir dir =
-    let exist = try Sys.is_directory dir with _ -> false in
+    let exist = dir_exist dir in
     if not exist then Unix.mkdir dir 0o0777
   in
 
-  audio_of_path paths
+  let audio_files = audio_of_path paths in
+
+  (* let _metadata =
+       Hashtbl.fold (fun a b c -> c) audio_files ([] : summaries list)
+     in *)
+  audio_files
   |> Hashtbl.iter (fun artist group ->
          if String.length artist > 0 then (
+           print_endline ("Artist: " ^ artist);
+
            let artist_dir = Filename.concat organize_dest artist in
-           mkdir artist_dir;
+           if not dry_run then mkdir artist_dir;
 
            group.albums
            |> List.iter (fun album ->
                   if String.length album.name > 0 then (
+                    print_endline ("Album: " ^ album.name);
+
                     let album_dir =
                       let maybe_year =
                         album.tracks
-                        |> List.find_opt (fun (_, track) ->
+                        |> List.find_map (fun (_, track) ->
                                try
-                                 let _ = Taglib.tag_year track in
-                                 true
-                               with _ -> false)
+                                 let track = Taglib.tag_year track in
+                                 Some track
+                               with _ -> None)
                       in
 
                       let prefix =
                         match maybe_year with
                         | None -> ""
-                        | Some (_, track) ->
-                            Printf.sprintf "[%s] "
-                              (safe_get_int Taglib.tag_year track)
+                        | Some track -> Printf.sprintf "[%d] " track
                       in
 
                       Filename.concat artist_dir (prefix ^ album.name)
                     in
 
-                    mkdir album_dir;
+                    if not dry_run then mkdir album_dir;
 
                     album.tracks
                     |> List.iter (fun (path, track) ->
@@ -212,8 +223,7 @@ let organizer opts =
                                if title_from_metadata <> Utils.random_state then
                                  let ext = Filename.extension file_name in
                                  title_from_metadata ^ ext
-                               else
-                                 file_name
+                               else file_name
                              in
 
                              name
@@ -221,10 +231,17 @@ let organizer opts =
 
                            let dest = Filename.concat album_dir file in
 
-                           if dry_run then
-                             Printf.printf "[RENAME] %s ➜ %s\n" path dest
-                           else
-                             Unix.rename path dest)))))
+                           match path = dest with
+                           | true -> print_endline "nothing to do"
+                           | false -> begin
+                               match dry_run with
+                               | true ->
+                                   (* colorify "@{<green>+ %s@}\n@{<red>- %s@}\n"
+                                      dest path; *)
+                                   print_endline
+                                     ("Rename from\n" ^ path ^ "\nTo\n" ^ dest)
+                               | false -> Unix.rename path dest
+                             end)))))
 
 (** Main entry point for the cli *)
 let run paths format tree infer organize dry_run =

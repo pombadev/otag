@@ -3,6 +3,7 @@
         "kind": "global"
     },
     "cSpell.words": [
+        "colorify",
         "cond",
         "getenv",
         "iteri",
