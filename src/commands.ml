@@ -65,14 +65,8 @@ let treeify opts =
 
 (** Update metadata of valid audio files *)
 let tag opts =
-  let { paths; infer; format; _ } = opts in
+  let { paths; infer; format = _format; _ } = opts in
 
-  print_endline
-    (match format with
-    | Some fmt -> fmt
-    | None -> "default");
-
-  (* let _format = format in *)
   match infer with
   | true ->
       paths

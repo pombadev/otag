@@ -10,6 +10,25 @@
 
 # Installation
 
+### From the source
+
+```bash
+git clone https://github.com/pjmp/otag.git
+
+cd otag
+
+opam switch create . 4.14.0 --deps-only
+
+eval $(opam env)
+
+dune build
+
+dune exec otag -- --help
+```
+
+# From opam
+
+To be published
 
 # Motivations
 
