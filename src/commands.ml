@@ -9,7 +9,7 @@ type options = {
   dry_run : bool;
 }
 
-let colorify = Spectrum.Simple.printf
+let colorify = Ocolor_format.printf
 
 (** Print valid audio files as tree to stdout *)
 let treeify opts =
@@ -25,7 +25,7 @@ let treeify opts =
     (fun _ grouped ->
       incr count;
 
-      colorify "@{<bold,yellow>%s@}\n" grouped.artist;
+      colorify "@{<bold;yellow>%s@}\n" grouped.artist;
 
       let album_count = List.length grouped.albums in
 
@@ -40,7 +40,7 @@ let treeify opts =
                else "├──"
              in
 
-             colorify "%s @{<bold,green>%s@}\n" pad album.name;
+             colorify "%s @{<bold;green>%s@}\n" pad album.name;
 
              let tracks_count = List.length album.tracks in
 
@@ -57,8 +57,7 @@ let treeify opts =
 
                     let bar = if stop then " " else "│" in
 
-                    colorify "%s %s @{<fuchsia>[%s]@} @{<bold,teal>%s@}\n" bar
-                      pad
+                    colorify "%s %s @{<cyan>[%s]@} @{<bold;blue>%s@}\n" bar pad
                       (safe_get_int Taglib.tag_track track)
                       (safe_get Taglib.tag_title track))))
     grouped
