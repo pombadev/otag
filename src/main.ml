@@ -1,7 +1,7 @@
 let () =
-  let flush () = Ocolor_format.pp_print_flush Ocolor_format.std_formatter () in
-
   let _ = Printexc.record_backtrace true in
+
+  let flush () = Ocolor_format.pp_print_flush Ocolor_format.std_formatter () in
 
   let exit_code = Cli.main () in
 
